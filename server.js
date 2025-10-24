@@ -5,6 +5,8 @@ import { connectDB } from "./config/database.js";
 import authRoutes from "./routes/authRoutes.js";
 import carRoutes from "./routes/carRoutes.js";
 import path from "path";
+import mongoose from "mongoose";
+
 
 
 dotenv.config();
@@ -28,3 +30,12 @@ app.get("/", (req, res) => {
 
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`Servidor corriendo en http://localhost:${PORT}`));
+
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => {
+    console.log("✅ MongoDB conectado");
+    app.listen(process.env.PORT || 4000, () => {
+      console.log("🚀 Servidor corriendo en puerto 4000");
+    });
+  })
+  .catch(err => console.error("❌ Error conectando a MongoDB:", err));
