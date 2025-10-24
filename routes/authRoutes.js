@@ -9,7 +9,7 @@ const router = express.Router();
 // REGISTRO
 router.post("/register", async (req, res) => {
   try {
-    const { nombre, apellido, idUniversidad, email, celular, password, role } = req.body;
+    const { name, lastName, universityId, email, phone, password, role } = req.body;
 
     if (!role || !["driver", "passenger"].includes(role)) {
       return res.status(400).json({ message: "Rol inválido" });
@@ -21,11 +21,11 @@ router.post("/register", async (req, res) => {
     const hashed = await bcrypt.hash(password, 10);
 
     const user = new User({
-      nombre,
-      apellido,
-      idUniversidad,
+      name,
+      lastName,
+      universityId,
       email,
-      celular,
+      phone,
       password: hashed,
       role,
     });
