@@ -8,8 +8,26 @@ import path from "path";
 
 dotenv.config();
 const app = express();
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://wheels-project-fe.vercel.app",
+];
 
-app.use(cors());
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Permitir llamadas sin origin (como desde Postman o el propio backend)
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("CORS not allowed"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
 app.use(express.json());
 app.use("/uploads", express.static("uploads")); 
 
