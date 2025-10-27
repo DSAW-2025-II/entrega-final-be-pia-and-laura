@@ -18,7 +18,7 @@ connectDB();
 
 // Rutas
 app.use("/api/v1/auth", authRoutes);
-app.use("/api/v1/cars", carRoutes);
+app.use("/api/v1/car", carRoutes);
 app.use("/uploads", express.static(path.resolve("uploads")));
 
 app.get("/", (req, res) => {

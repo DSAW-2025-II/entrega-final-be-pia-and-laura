@@ -5,7 +5,7 @@ import upload from "../middleware/uploadMiddleware.js";
 const router = express.Router();
 
 router.post(
-  "/login",
+  "/",
   upload.fields([
     { name: "carPhoto", maxCount: 1 },
     { name: "soat", maxCount: 1 },
