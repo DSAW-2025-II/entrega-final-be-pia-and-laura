@@ -18,22 +18,27 @@ export const registerCar = async (req, res) => {
       return res.status(400).json({ message: "Este vehículo ya está registrado." });
     }
 
-    const carPhoto = req.files["carPhoto"]?.[0];
-    const soat = req.files["soat"]?.[0];
+    // ✅ Ahora las URLs vienen directamente desde Cloudinary
+    const carPhoto = req.files["carPhoto"]?.[0]?.path;
+    const soat = req.files["soat"]?.[0]?.path;
+
+    if (!carPhoto || !soat) {
+      return res.status(400).json({ message: "Faltan archivos del vehículo o del SOAT." });
+    }
 
     const newCar = new Car({
       licensePlate: licensePlate.toUpperCase(),
       capacity,
       make,
       model,
-      carPhotoUrl: carPhoto ? `/uploads/${carPhoto.filename}` : null,
-      soatUrl: soat ? `/uploads/${soat.filename}` : null,
+      carPhotoUrl: carPhoto,
+      soatUrl: soat,
     });
 
     await newCar.save();
     res.status(201).json({ message: "Vehículo registrado con éxito", car: newCar });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error al registrar el vehículo." });
+    console.error("❌ Error al registrar el vehículo:", error);
+    res.status(500).json({ message: "Error al registrar el vehículo.", error: error.message });
   }
 };
