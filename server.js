@@ -9,8 +9,8 @@ import path from "path";
 dotenv.config();
 const app = express();
 const allowedOrigins = [
-  "http://localhost:5173",
-  "https://wheels-project-fe.vercel.app",
+  "http://localhost:5174",
+  "https://wheels-project.vercel.app",
 ];
 
 
