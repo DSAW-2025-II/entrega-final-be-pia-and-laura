@@ -31,11 +31,28 @@ router.post("/register", async (req, res) => {
     });
 
     await user.save();
-    res.status(201).json({ message: "Usuario registrado correctamente", user });
+
+    // 🔹 Crear token automáticamente al registrarse
+    const token = jwt.sign(
+      { id: user._id, email: user.email, role },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.status(201).json({
+      message: "Usuario registrado correctamente",
+      user: {
+        id: user._id,
+        email: user.email,
+        role: user.role,
+      },
+      token, // ✅ IMPORTANTE
+    });
   } catch (error) {
     res.status(500).json({ message: "Error en el servidor", error: error.message });
   }
 });
+
 
 // INICIO DE SESIÓN
 router.post("/login", async (req, res) => {

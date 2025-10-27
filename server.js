@@ -8,19 +8,20 @@ import path from "path";
 
 dotenv.config();
 const app = express();
-const allowedOrigins = [
-  "http://localhost:5174",
-  "https://wheels-project.vercel.app",
-];
 
+const allowedOrigins = [
+  "http://localhost:5173", 
+  "http://localhost:5174",
+  "https://wheels-project.vercel.app", // ✅ producción
+];
 
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Permitir llamadas sin origin (como desde Postman o el propio backend)
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
+        console.warn("❌ CORS bloqueado para:", origin);
         callback(new Error("CORS not allowed"));
       }
     },
@@ -28,13 +29,15 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-app.use(express.json());
-app.use("/uploads", express.static("uploads")); 
 
-// Conectar a MongoDB
+// ✅ Manejar preflight OPTIONS
+app.options("*", cors());
+
+app.use(express.json());
+app.use("/uploads", express.static("uploads"));
+
 connectDB();
 
-// Rutas
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/car", carRoutes);
 app.use("/uploads", express.static(path.resolve("uploads")));
@@ -43,6 +46,5 @@ app.get("/", (req, res) => {
   res.send("Servidor funcionando con MongoDB");
 });
 
-// Iniciar servidor (solo una vez)
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => console.log(`🚀 Servidor corriendo en puerto ${PORT}`));
