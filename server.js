@@ -10,7 +10,7 @@ dotenv.config();
 const app = express();
 
 const allowedOrigins = [
-  "http://localhost:5173", 
+  "http://localhost:5173",
   "http://localhost:5174",
   "https://wheels-project.vercel.app", // ✅ producción
 ];
@@ -29,9 +29,6 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-
-// ✅ Manejar preflight OPTIONS
-app.options("*", cors());
 
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
