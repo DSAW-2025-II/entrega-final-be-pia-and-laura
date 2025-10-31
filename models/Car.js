@@ -13,6 +13,12 @@ const carSchema = new mongoose.Schema({
   carPhotoUrl: { type: String },
   soatUrl: { type: String },
   createdAt: { type: Date, default: Date.now },
+  owner: {  
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: "User", 
+    required: true,
+    unique: true  // Un usuario solo puede tener un carro registrado
+  },
 });
 
 export default mongoose.model("Car", carSchema);

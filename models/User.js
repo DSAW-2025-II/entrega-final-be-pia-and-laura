@@ -8,6 +8,12 @@ const userSchema = new mongoose.Schema({
   phone: String,
   password: { type: String, required: true },
   role: { type: String, enum: ["driver", "passenger"], required: true },
+  photo: { type: String, default: "" },
+  car: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: "Car", 
+    default: null // 👈 si no tiene carro, será null
+  },
 });
 
 export default mongoose.model("User", userSchema);

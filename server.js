@@ -5,6 +5,9 @@ import { connectDB } from "./config/database.js";
 import authRoutes from "./routes/authRoutes.js";
 import carRoutes from "./routes/carRoutes.js";
 import path from "path";
+import userRoutes from "./routes/userRoutes.js";
+import reservationRoutes from "./routes/reservationRoutes.js";
+
 
 dotenv.config();
 const app = express();
@@ -29,12 +32,12 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 
 connectDB();
-
+app.use("/api/reservations", reservationRoutes);
+app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/car", carRoutes);
 app.use("/uploads", express.static(path.resolve("uploads")));
@@ -43,5 +46,6 @@ app.get("/", (req, res) => {
   res.send("Servidor funcionando con MongoDB");
 });
 
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`🚀 Servidor corriendo en puerto ${PORT}`));
+console.log("Cloudinary:", process.env.CLOUDINARY_CLOUD_NAME, process.env.CLOUDINARY_API_KEY);

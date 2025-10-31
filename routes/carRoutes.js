@@ -3,7 +3,7 @@ import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
 import { registerCar } from "../controllers/carController.js";
-
+import { auth } from "../middleware/auth.js";
 const router = express.Router();
 
 // 🔧 Configuración de Cloudinary
@@ -35,5 +35,6 @@ router.post(
   ]),
   registerCar
 );
+router.post("/register", auth, registerCar); // 🔒 Protegido por JWT
 
 export default router;
