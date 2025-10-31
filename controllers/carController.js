@@ -3,6 +3,7 @@ import Car from "../models/Car.js";
 export const registerCar = async (req, res) => {
   try {
     const { licensePlate, capacity, make, model } = req.body;
+    console.log("🧑‍💻 Usuario autenticado:", req.user);
     const userId = req.user.id;
 
     if (!licensePlate || !capacity || !make || !model) {

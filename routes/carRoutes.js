@@ -29,12 +29,12 @@ const upload = multer({ storage });
 // 🚗 Ruta para registrar un auto
 router.post(
   "/",
+  auth,
   upload.fields([
     { name: "carPhoto", maxCount: 1 },
     { name: "soat", maxCount: 1 },
   ]),
   registerCar
 );
-router.post("/register", auth, registerCar); // 🔒 Protegido por JWT
 
 export default router;
