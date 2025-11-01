@@ -3,7 +3,7 @@ import cloudinary from "../config/cloudinary.js";
 import User from "../models/User.js";
 import { auth } from "../middleware/auth.js";
 import upload from "../middleware/uploadMiddleware.js";
-import { updateRole } from "../controllers/userController.js";
+import { updateRole, getMe, updateUser } from "../controllers/userController.js";
 import fs from "fs";
 
 const router = express.Router();
@@ -49,5 +49,11 @@ router.post("/upload-photo", auth, upload.single("photo"), async (req, res) => {
     });
   }
 });
+// Obtener datos del usuario autenticado
+router.get("/me", auth, getMe);
+
+// Actualizar datos del usuario
+router.put("/:id", auth, updateUser);
+
 
 export default router;
