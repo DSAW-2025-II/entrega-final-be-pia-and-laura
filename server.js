@@ -20,18 +20,20 @@ const allowedOrigins = [
 
 app.use(
   cors({
-    origin: (origin, callback) => {
+    origin: function (origin, callback) {
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
         console.warn("❌ CORS bloqueado para:", origin);
-        callback(new Error("CORS not allowed"));
+        callback(new Error("No autorizado por CORS"));
       }
     },
+    credentials: true, // ✅ permite encabezados como Authorization o cookies
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+app.options("*", cors());
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 
