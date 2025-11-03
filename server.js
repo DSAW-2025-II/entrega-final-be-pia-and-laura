@@ -28,12 +28,13 @@ app.use(
         callback(new Error("No autorizado por CORS"));
       }
     },
-    credentials: true, // ✅ permite encabezados como Authorization o cookies
+    credentials: true, // ✅ permite enviar encabezados de auth o cookies
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-app.options("*", cors());
+
+app.options("/*", cors());
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 
