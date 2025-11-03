@@ -6,7 +6,7 @@ import {
   getMe,
   updateUser,
   checkEmail,
-  updateProfilePhoto, // si la usas
+  updateProfilePhoto,
 } from "../controllers/userController.js";
 
 const router = express.Router();

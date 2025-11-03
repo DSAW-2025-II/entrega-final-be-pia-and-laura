@@ -59,10 +59,16 @@ export const checkEmail = async (req, res) => {
 // 🟢 Obtener perfil del usuario autenticado
 export const getMe = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).select("-password");
+    // 🔹 Trae al usuario y "popula" el campo 'car' si existe
+    const user = await User.findById(req.user.id)
+      .select("-password")
+      .populate("car"); // 👈 esta línea trae los datos del carro
+
     if (!user) return res.status(404).json({ message: "Usuario no encontrado" });
+
     res.status(200).json(user);
   } catch (error) {
+    console.error("Error en getMe:", error);
     res.status(500).json({ message: error.message });
   }
 };
