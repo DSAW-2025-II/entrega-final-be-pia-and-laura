@@ -28,13 +28,14 @@ app.use(
         callback(new Error("No autorizado por CORS"));
       }
     },
-    credentials: true, // ✅ permite enviar encabezados de auth o cookies
+    credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-app.options("/*", cors());
+// ✅ Express + Vercel compatible
+app.options(/.*/, cors());
 app.use(express.json());
 app.use("/uploads", express.static("uploads"));
 
