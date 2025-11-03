@@ -41,7 +41,6 @@ app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/car", carRoutes);
 app.use("/uploads", express.static(path.resolve("uploads")));
-router.post("/check-email", checkEmail);
 
 app.get("/", (req, res) => {
   res.send("Servidor funcionando con MongoDB");
