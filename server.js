@@ -37,7 +37,7 @@ app.use("/uploads", express.static("uploads"));
 
 connectDB();
 app.use("/api/v1/reservations", reservationRoutes);
-app.use("/api/v1/user", userRoutes);
+app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/car", carRoutes);
 app.use("/uploads", express.static(path.resolve("uploads")));
