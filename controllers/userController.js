@@ -1,9 +1,12 @@
+// controllers/userController.js
 import User from "../models/User.js";
+import cloudinary from "../config/cloudinary.js";
+import fs from "fs";
 
 // 🟢 Cambiar el rol del usuario autenticado
 export const updateRole = async (req, res) => {
   try {
-    const userId = req.user.id; // viene del token
+    const userId = req.user.id;
     const { newRole } = req.body;
 
     const validRoles = ["passenger", "driver"];
@@ -38,9 +41,15 @@ export const checkEmail = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (user) {
-      return res.status(200).json({ exists: true, message: "El correo ya está registrado" });
+      return res.status(200).json({
+        exists: true,
+        message: "El correo ya está registrado",
+      });
     } else {
-      return res.status(200).json({ exists: false, message: "Correo disponible" });
+      return res.status(200).json({
+        exists: false,
+        message: "Correo disponible",
+      });
     }
   } catch (error) {
     res.status(500).json({ message: "Error al verificar el correo" });
@@ -77,5 +86,41 @@ export const updateUser = async (req, res) => {
     res.status(200).json(updatedUser);
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+// 📸 Subir o actualizar foto de perfil
+export const updateProfilePhoto = async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ message: "No se subió ninguna imagen" });
+
+    // Subir imagen a Cloudinary
+    const result = await cloudinary.uploader.upload(req.file.path, {
+      folder: "users",
+      transformation: [{ width: 500, height: 500, crop: "thumb", gravity: "face" }],
+    });
+
+    // Actualizar el usuario con la nueva URL
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      { photo: result.secure_url },
+      { new: true, select: "-password" }
+    );
+
+    // Borrar archivo temporal
+    fs.unlink(req.file.path, (err) => {
+      if (err) console.error("Error al eliminar archivo temporal:", err);
+    });
+
+    res.status(200).json({
+      message: "Foto de perfil actualizada correctamente",
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error("Error al subir foto:", error);
+    res.status(500).json({
+      message: "Error al subir foto de perfil",
+      error: error.message,
+    });
   }
 };
