@@ -3,57 +3,29 @@ import cloudinary from "../config/cloudinary.js";
 import User from "../models/User.js";
 import { auth } from "../middleware/auth.js";
 import upload from "../middleware/uploadMiddleware.js";
-import { updateRole, getMe, updateUser } from "../controllers/userController.js";
-import fs from "fs";
+import {
+  updateRole,
+  getMe,
+  updateUser,
+  checkEmailExists,
+  updateProfilePhoto,
+} from "../controllers/userController.js";
 
 const router = express.Router();
 
-router.put("/update-role", auth , updateRole);
-// ✅ Nueva ruta para obtener el perfil del usuario autenticado
-router.get("/profile", auth, (req, res) => {
-  res.json(req.user);
-});
+// 🟢 Cambiar rol del usuario
+router.put("/update-role", auth, updateRole);
 
-// 📸 Subir foto de perfil
-router.post("/upload-photo", auth, upload.single("photo"), async (req, res) => {
-  try {
-    if (!req.file) return res.status(400).json({ message: "No file uploaded" });
-
-    // Subir a Cloudinary
-    const result = await cloudinary.uploader.upload(req.file.path, {
-      folder: "users",
-      transformation: [{ width: 500, height: 500, crop: "thumb", gravity: "face" }],
-    });
-
-    // Actualizar el usuario autenticado
-    const updatedUser = await User.findByIdAndUpdate(
-      req.user._id,
-      { photo: result.secure_url },
-      { new: true, select: "-password" }
-    );
-
-    // Eliminar archivo temporal
-    fs.unlink(req.file.path, (err) => {
-      if (err) console.error("Error deleting temp file:", err);
-    });
-
-    res.status(200).json({
-      message: "Photo uploaded successfully",
-      user: updatedUser,
-    });
-  } catch (error) {
-    console.error("Upload error:", error);
-    res.status(500).json({
-      message: "Error uploading photo",
-      error: error.message,
-    });
-  }
-});
-// Obtener datos del usuario autenticado
+// 🟢 Obtener perfil autenticado
 router.get("/me", auth, getMe);
 
-// Actualizar datos del usuario
+// 🟢 Verificar si un correo ya está registrado
+router.get("/check-email", checkEmailExists);
+
+// 🟢 Actualizar datos del usuario (nombre, correo, id, teléfono)
 router.put("/:id", auth, updateUser);
 
+// 🟢 Subir o actualizar foto de perfil
+router.post("/upload-photo", auth, upload.single("photo"), updateProfilePhoto);
 
 export default router;

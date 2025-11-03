@@ -6,7 +6,6 @@ export const updateRole = async (req, res) => {
     const userId = req.user.id; // viene del token
     const { newRole } = req.body;
 
-    // Validar roles válidos
     const validRoles = ["passenger", "driver"];
     if (!validRoles.includes(newRole)) {
       return res.status(400).json({ message: "Rol no válido" });
@@ -15,7 +14,7 @@ export const updateRole = async (req, res) => {
     const user = await User.findByIdAndUpdate(
       userId,
       { role: newRole },
-      { new: true }
+      { new: true, select: "-password" }
     );
 
     if (!user) {
@@ -32,31 +31,50 @@ export const updateRole = async (req, res) => {
   }
 };
 
-// GET /api/v1/users/me
+// 🟣 Verificar si un correo ya existe (para registro)
+export const checkEmail = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    if (user) {
+      return res.status(200).json({ exists: true, message: "El correo ya está registrado" });
+    } else {
+      return res.status(200).json({ exists: false, message: "Correo disponible" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Error al verificar el correo" });
+  }
+};
+
+// 🟢 Obtener perfil del usuario autenticado
 export const getMe = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id); // id viene del token
-    if (!user) return res.status(404).json({ message: "User not found" });
-    res.json(user);
+    const user = await User.findById(req.user.id).select("-password");
+    if (!user) return res.status(404).json({ message: "Usuario no encontrado" });
+    res.status(200).json(user);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
 
-// PUT /api/v1/users/:id
+// 🟡 Actualizar datos del usuario autenticado
 export const updateUser = async (req, res) => {
   try {
     if (req.user.id !== req.params.id) {
-      return res.status(403).json({ message: "Unauthorized" });
+      return res.status(403).json({ message: "No autorizado" });
     }
 
-    const updatedUser = await User.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true, select: "-password" }
-    );
+    const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+      select: "-password",
+    });
 
-    res.json(updatedUser);
+    if (!updatedUser) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    res.status(200).json(updatedUser);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
