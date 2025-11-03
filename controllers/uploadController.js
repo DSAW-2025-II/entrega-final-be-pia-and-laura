@@ -11,7 +11,7 @@ export const uploadPhoto = async (req, res) => {
     }
 
     const result = await cloudinary.uploader.upload(file.path, {
-      folder: "users", // carpeta opcional
+      folder: "user", // carpeta opcional
     });
 
     fs.unlinkSync(file.path);

@@ -102,7 +102,7 @@ export const updateProfilePhoto = async (req, res) => {
 
     // Subir imagen a Cloudinary
     const result = await cloudinary.uploader.upload(req.file.path, {
-      folder: "users",
+      folder: "user",
       transformation: [{ width: 500, height: 500, crop: "thumb", gravity: "face" }],
     });
 
