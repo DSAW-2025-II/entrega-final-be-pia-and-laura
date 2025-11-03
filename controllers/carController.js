@@ -56,7 +56,7 @@ export const registerCar = async (req, res) => {
     await newCar.save();
 
     // ✅ Actualizar al usuario para asignarle este carro
-    await User.findByIdAndUpdate(userId, { car: newCar._id });
+    await User.findByIdAndUpdate(userId, { car: newCar._id }, { new: true });
 
     res.status(201).json({
       message: "Vehículo registrado con éxito 🚗",
