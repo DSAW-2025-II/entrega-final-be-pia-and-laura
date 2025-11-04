@@ -37,11 +37,11 @@ export const updateRole = async (req, res) => {
 // 🟣 Verificar si un correo ya existe (para registro)
 export const checkEmail = async (req, res) => {
   try {
-    const { email } = req.body;
+    const { email } = req.query; // 👈 usa req.query porque tu frontend lo envía por query (?email=)
     const user = await User.findOne({ email });
 
     if (user) {
-      return res.status(200).json({
+      return res.status(409).json({
         exists: true,
         message: "El correo ya está registrado",
       });
@@ -55,6 +55,7 @@ export const checkEmail = async (req, res) => {
     res.status(500).json({ message: "Error al verificar el correo" });
   }
 };
+
 
 // 🟢 Obtener perfil del usuario autenticado
 export const getMe = async (req, res) => {

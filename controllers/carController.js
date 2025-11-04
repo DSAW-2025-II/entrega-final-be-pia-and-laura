@@ -1,10 +1,12 @@
 import Car from "../models/Car.js";
-import User from "../models/User.js"; // 👈 importa el modelo de usuario
+import User from "../models/User.js"; // 👈 modelo de usuario
 
+// ==========================
+// 🚘 REGISTRAR CARRO
+// ==========================
 export const registerCar = async (req, res) => {
   try {
     const { licensePlate, capacity, make, model } = req.body;
-    console.log("🧑‍💻 Usuario autenticado:", req.user);
     const userId = req.user.id;
 
     if (!licensePlate || !capacity || !make || !model) {
@@ -19,7 +21,7 @@ export const registerCar = async (req, res) => {
       });
     }
 
-    // 🛑 Verificar si la placa ya existe
+    // 🛑 Validar formato de placa
     const licenseRegex = /^[A-Z]{3}[0-9]{3}$/;
     if (!licenseRegex.test(licensePlate.toUpperCase())) {
       return res.status(400).json({
@@ -27,6 +29,7 @@ export const registerCar = async (req, res) => {
       });
     }
 
+    // 🛑 Verificar si la placa ya está registrada
     const existingCar = await Car.findOne({
       licensePlate: licensePlate.toUpperCase()
     });
@@ -34,6 +37,7 @@ export const registerCar = async (req, res) => {
       return res.status(400).json({ message: "Este vehículo ya está registrado." });
     }
 
+    // 📸 Archivos subidos
     const carPhoto = req.files["carPhoto"]?.[0]?.path;
     const soat = req.files["soat"]?.[0]?.path;
 
@@ -43,6 +47,7 @@ export const registerCar = async (req, res) => {
         .json({ message: "Faltan archivos del vehículo o del SOAT." });
     }
 
+    // ✅ Crear y guardar nuevo carro
     const newCar = new Car({
       licensePlate: licensePlate.toUpperCase(),
       capacity,
@@ -55,7 +60,7 @@ export const registerCar = async (req, res) => {
 
     await newCar.save();
 
-    // ✅ Actualizar al usuario para asignarle este carro
+    // ✅ Actualizar el usuario con el ID del carro
     await User.findByIdAndUpdate(userId, { car: newCar._id }, { new: true });
 
     res.status(201).json({
@@ -67,5 +72,69 @@ export const registerCar = async (req, res) => {
     res
       .status(500)
       .json({ message: "Error al registrar el vehículo.", error: error.message });
+  }
+};
+
+// ==========================
+// ✏️ ACTUALIZAR DATOS DEL CARRO
+// ==========================
+import Car from "../models/Car.js";
+
+export const updateCar = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { licensePlate, capacity, make, model } = req.body;
+
+    // 🕵️ Buscar el carro del usuario autenticado
+    const car = await Car.findOne({ owner: userId });
+    if (!car) {
+      return res.status(404).json({ message: "No se encontró el carro del usuario." });
+    }
+
+    // 🛑 Validar formato de placa si se envía una nueva
+    if (licensePlate) {
+      const licenseRegex = /^[A-Z]{3}[0-9]{3}$/;
+      if (!licenseRegex.test(licensePlate.toUpperCase())) {
+        return res.status(400).json({
+          message: "La placa debe tener 3 letras y 3 números (ej: ABC123)."
+        });
+      }
+
+      // Verificar que no esté usada por otro carro
+      const existingCar = await Car.findOne({
+        licensePlate: licensePlate.toUpperCase(),
+        _id: { $ne: car._id },
+      });
+      if (existingCar) {
+        return res.status(400).json({
+          message: "Esta placa ya está registrada en otro vehículo."
+        });
+      }
+    }
+
+    // 📸 Manejo de archivos (Cloudinary)
+    const carPhoto = req.files?.carPhoto?.[0]?.path;
+    const soat = req.files?.soat?.[0]?.path;
+
+    // 🔄 Actualizar solo los campos enviados
+    if (licensePlate) car.licensePlate = licensePlate.toUpperCase();
+    if (capacity) car.capacity = capacity;
+    if (make) car.make = make;
+    if (model) car.model = model;
+    if (carPhoto) car.carPhotoUrl = carPhoto;
+    if (soat) car.soatUrl = soat;
+
+    await car.save();
+
+    res.status(200).json({
+      message: "✅ Vehículo actualizado correctamente.",
+      car,
+    });
+  } catch (error) {
+    console.error("❌ Error al actualizar el vehículo:", error);
+    res.status(500).json({
+      message: "Error al actualizar los datos del vehículo.",
+      error: error.message,
+    });
   }
 };

@@ -2,8 +2,9 @@ import express from "express";
 import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
-import { registerCar } from "../controllers/carController.js";
+import { registerCar, updateCar, getMyCar } from "../controllers/carController.js";
 import { auth } from "../middleware/auth.js";
+
 const router = express.Router();
 
 // 🔧 Configuración de Cloudinary
@@ -13,11 +14,11 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// 🎞️ Configuración de Multer + Cloudinary Storage
+// 🎞️ Multer + Cloudinary Storage
 const storage = new CloudinaryStorage({
   cloudinary,
   params: async (req, file) => ({
-    folder: "wheels-project", // carpeta en tu cuenta de Cloudinary
+    folder: "wheels-project",
     allowed_formats: ["jpg", "png", "jpeg", "pdf"],
     public_id: Date.now() + "-" + file.originalname.split(" ").join("_"),
     resource_type: file.mimetype === "application/pdf" ? "raw" : "image",
@@ -26,7 +27,7 @@ const storage = new CloudinaryStorage({
 
 const upload = multer({ storage });
 
-// 🚗 Ruta para registrar un auto
+// 🚗 Registrar un nuevo carro
 router.post(
   "/",
   auth,
@@ -35,6 +36,20 @@ router.post(
     { name: "soat", maxCount: 1 },
   ]),
   registerCar
+);
+
+// 🚙 Obtener el carro del usuario actual
+router.get("/myCar", auth, getMyCar);
+
+// ✏️ Actualizar datos del carro existente
+router.put(
+  "/update",
+  auth,
+  upload.fields([
+    { name: "carPhoto", maxCount: 1 },
+    { name: "soat", maxCount: 1 },
+  ]),
+  updateCar
 );
 
 export default router;
