@@ -85,34 +85,39 @@ export const updateUser = async (req, res) => {
     const { password, ...rest } = req.body;
     const updateData = { ...rest };
 
-    // 🔹 Si el usuario envía una nueva contraseña
+    // 🔹 Si hay nueva contraseña
     if (password && password.trim() !== "") {
       const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(password, salt);
-      updateData.password = hashedPassword;
+      updateData.password = await bcrypt.hash(password, salt);
     }
 
-    // 🔹 Si se sube imagen desde Cloudinary (ya manejas eso en otra ruta)
-    // Aquí solo dejamos preparado por si también llega desde FormData
+    // 🔹 Si llega nueva imagen
     if (req.file) {
-      updateData.photo = req.file.path;
+      const upload = await cloudinary.uploader.upload(req.file.path, {
+        folder: "profile_images",
+        transformation: [{ width: 500, height: 500, crop: "fill" }],
+      });
+      updateData.profileImage = upload.secure_url;
     }
 
     const updatedUser = await User.findByIdAndUpdate(req.params.id, updateData, {
       new: true,
+      runValidators: true,
     }).select("-password");
 
     if (!updatedUser) {
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
 
-    res.status(200).json(updatedUser);
+    res.status(200).json({
+      message: "Usuario actualizado correctamente",
+      user: updatedUser,
+    });
   } catch (error) {
-    console.error("Error al actualizar usuario:", error);
-    res.status(500).json({ message: error.message });
+    console.error("❌ Error al actualizar usuario:", error);
+    res.status(500).json({ message: "Error al actualizar usuario" });
   }
 };
-
 // 📸 Subir o actualizar foto de perfil
 export const updateProfilePhoto = async (req, res) => {
   try {
