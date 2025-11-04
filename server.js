@@ -35,7 +35,7 @@ app.use(
 );
 
 // ✅ Permitir preflight requests (con misma config)
-app.options("*", cors());
+app.use(cors());
 
 // Middleware base
 app.use(express.json());
