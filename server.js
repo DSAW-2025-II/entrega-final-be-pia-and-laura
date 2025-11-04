@@ -10,6 +10,7 @@ import reservationRoutes from "./routes/reservationRoutes.js";
 import uploadRoutes from "./routes/uploadRotes.js";
 
 dotenv.config();
+console.log("Cloudinary env vars:", process.env.CLOUDINARY_CLOUD_NAME ? "✅ Loaded" : "❌ Missing");
 const app = express();
 
 // 🌐 Configuración de CORS
@@ -54,5 +55,6 @@ app.use("/api/v1/upload", uploadRoutes);
 app.get("/", (req, res) => {
   res.send("🚀 Servidor funcionando con MongoDB y listo para recibir peticiones");
 });
+
 
 export default app;
