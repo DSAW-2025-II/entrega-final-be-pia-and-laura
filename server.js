@@ -7,7 +7,7 @@ import authRoutes from "./routes/authRoutes.js";
 import carRoutes from "./routes/carRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import reservationRoutes from "./routes/reservationRoutes.js";
-import uploadRoutes from "./routes/uploadRoutes.js";
+import uploadRoutes from "./routes/uploadRotes.js";
 
 dotenv.config();
 const app = express();
