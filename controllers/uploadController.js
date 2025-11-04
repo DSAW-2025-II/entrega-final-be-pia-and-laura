@@ -1,24 +1,15 @@
-import upload from "../middlewares/uploadMiddleware.js";
-import cloudinary from "../config/cloudinary.js";
-import fs from "fs";
-
 export const uploadPhoto = async (req, res) => {
   try {
-    const file = req.file;
-
-    if (!file) {
+    if (!req.file) {
       return res.status(400).json({ error: "No se ha enviado ningún archivo" });
     }
 
-    const result = await cloudinary.uploader.upload(file.path, {
-      folder: "user", // carpeta opcional
-    });
-
-    fs.unlinkSync(file.path);
+    // multer-storage-cloudinary devuelve la URL directa
+    const imageUrl = req.file.path;
 
     res.json({
       message: "Archivo subido correctamente",
-      url: result.secure_url,
+      url: imageUrl,
     });
   } catch (error) {
     console.error("Error al subir:", error);
