@@ -75,6 +75,32 @@ export const registerCar = async (req, res) => {
   }
 };
 
+
+// ==========================
+// 🚗 OBTENER EL CARRO DEL USUARIO AUTENTICADO
+// ==========================
+export const getMyCar = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Buscar el carro del usuario y popular algunos datos del dueño
+    const car = await Car.findOne({ owner: userId }).populate("owner", "name email role");
+
+    if (!car) {
+      return res.status(404).json({ message: "No se encontró ningún carro asociado a este usuario." });
+    }
+
+    res.status(200).json({ car });
+  } catch (error) {
+    console.error("❌ Error al obtener el carro:", error);
+    res.status(500).json({
+      message: "Error al obtener el carro.",
+      error: error.message,
+    });
+  }
+};
+
+
 // ==========================
 // ✏️ ACTUALIZAR DATOS DEL CARRO
 // ==========================
