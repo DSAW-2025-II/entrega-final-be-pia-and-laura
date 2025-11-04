@@ -3,22 +3,34 @@ import User from "../models/User.js";
 
 export const auth = async (req, res, next) => {
   try {
-    const header = req.headers.authorization;
-    if (!header || !header.startsWith("Bearer ")) {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader?.startsWith("Bearer ")) {
       return res.status(401).json({ message: "No token provided" });
     }
 
-    const token = header.split(" ")[1];
+    const token = authHeader.split(" ")[1];
+    if (!process.env.JWT_SECRET) {
+      console.error("❌ JWT_SECRET no está definido en las variables de entorno.");
+      return res.status(500).json({ message: "Error interno del servidor." });
+    }
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const user = await User.findById(decoded.id).select("-password");
+    // ⚠️ Verifica si tu token tiene "id" o "_id"
+    const userId = decoded.id || decoded._id;
+    if (!userId) {
+      console.error("❌ Token inválido: no contiene id del usuario.");
+      return res.status(401).json({ message: "Token inválido." });
+    }
+
+    const user = await User.findById(userId).select("-password");
     if (!user) {
-      return res.status(401).json({ message: "User not found" });
+      return res.status(401).json({ message: "Usuario no encontrado." });
     }
 
     req.user = {
       id: user._id.toString(),
-      _id: user._id.toString(),
       email: user.email,
       role: user.role,
       name: user.name,
@@ -26,7 +38,7 @@ export const auth = async (req, res, next) => {
 
     next();
   } catch (err) {
-    console.error("Auth error:", err);
-    return res.status(401).json({ message: "Invalid or expired token" });
+    console.error("❌ Error en auth middleware:", err);
+    return res.status(401).json({ message: "Token inválido o expirado." });
   }
 };
