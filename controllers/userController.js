@@ -1,79 +1,7 @@
 import User from "../models/User.js";
 import cloudinary from "../config/cloudinary.js";
-import fs from "fs";
 import bcrypt from "bcryptjs";
-
-
-// 🟢 Cambiar el rol del usuario autenticado
-export const updateRole = async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const { newRole } = req.body;
-
-    const validRoles = ["passenger", "driver"];
-    if (!validRoles.includes(newRole)) {
-      return res.status(400).json({ message: "Rol no válido" });
-    }
-
-    const user = await User.findByIdAndUpdate(
-      userId,
-      { role: newRole },
-      { new: true, select: "-password" }
-    );
-
-    if (!user) {
-      return res.status(404).json({ message: "Usuario no encontrado" });
-    }
-
-    res.status(200).json({
-      message: `Rol actualizado a ${newRole} correctamente.`,
-      user,
-    });
-  } catch (error) {
-    console.error("Error al actualizar rol:", error);
-    res.status(500).json({ message: "Error al actualizar rol" });
-  }
-};
-
-// 🟣 Verificar si un correo ya existe (para registro)
-export const checkEmail = async (req, res) => {
-  try {
-    const { email } = req.query; // 👈 usa req.query porque tu frontend lo envía por query (?email=)
-    const user = await User.findOne({ email });
-
-    if (user) {
-      return res.status(409).json({
-        exists: true,
-        message: "El correo ya está registrado",
-      });
-    } else {
-      return res.status(200).json({
-        exists: false,
-        message: "Correo disponible",
-      });
-    }
-  } catch (error) {
-    res.status(500).json({ message: "Error al verificar el correo" });
-  }
-};
-
-
-// 🟢 Obtener perfil del usuario autenticado
-export const getMe = async (req, res) => {
-  try {
-    // 🔹 Trae al usuario y "popula" el campo 'car' si existe
-    const user = await User.findById(req.user.id)
-      .select("-password")
-      .populate("car"); // 👈 esta línea trae los datos del carro
-
-    if (!user) return res.status(404).json({ message: "Usuario no encontrado" });
-
-    res.status(200).json(user);
-  } catch (error) {
-    console.error("Error en getMe:", error);
-    res.status(500).json({ message: error.message });
-  }
-};
+import streamifier from "streamifier"; // 👈 lo usaremos para subir buffers a Cloudinary
 
 // 🟡 Actualizar datos del usuario autenticado
 export const updateUser = async (req, res) => {
@@ -91,13 +19,23 @@ export const updateUser = async (req, res) => {
       updateData.password = await bcrypt.hash(password, salt);
     }
 
-    // 🔹 Si llega nueva imagen
+    // 🔹 Si llega nueva imagen (desde memoria)
     if (req.file) {
-      const upload = await cloudinary.uploader.upload(req.file.path, {
-        folder: "profile_images",
-        transformation: [{ width: 500, height: 500, crop: "fill" }],
+      const result = await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            folder: "profile_images",
+            transformation: [{ width: 500, height: 500, crop: "fill" }],
+          },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
       });
-      updateData.profileImage = upload.secure_url;
+
+      updateData.profileImage = result.secure_url;
     }
 
     const updatedUser = await User.findByIdAndUpdate(req.params.id, updateData, {
@@ -118,28 +56,34 @@ export const updateUser = async (req, res) => {
     res.status(500).json({ message: "Error al actualizar usuario" });
   }
 };
+
 // 📸 Subir o actualizar foto de perfil
 export const updateProfilePhoto = async (req, res) => {
   try {
-    if (!req.file) return res.status(400).json({ message: "No se subió ninguna imagen" });
+    if (!req.file)
+      return res.status(400).json({ message: "No se subió ninguna imagen" });
 
-    // Subir imagen a Cloudinary
-    const result = await cloudinary.uploader.upload(req.file.path, {
-      folder: "user",
-      transformation: [{ width: 500, height: 500, crop: "thumb", gravity: "face" }],
+    const result = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: "user",
+          transformation: [
+            { width: 500, height: 500, crop: "thumb", gravity: "face" },
+          ],
+        },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        }
+      );
+      streamifier.createReadStream(req.file.buffer).pipe(uploadStream);
     });
 
-    // Actualizar el usuario con la nueva URL
     const updatedUser = await User.findByIdAndUpdate(
       req.user._id,
       { photo: result.secure_url },
       { new: true, select: "-password" }
     );
-
-    // Borrar archivo temporal
-    fs.unlink(req.file.path, (err) => {
-      if (err) console.error("Error al eliminar archivo temporal:", err);
-    });
 
     res.status(200).json({
       message: "Foto de perfil actualizada correctamente",

@@ -1,29 +1,32 @@
 import express from "express";
-import { auth } from "../middleware/auth.js";
-import upload from "../middleware/uploadMiddleware.js";
+import multer from "multer";
 import {
-  updateRole,
   getMe,
   updateUser,
+  updateRole,
   checkEmail,
   updateProfilePhoto,
 } from "../controllers/userController.js";
+import { auth } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// 🟢 Cambiar rol del usuario
-router.put("/update-role", auth, updateRole);
+// 🧩 Configuración de Multer (para subir imágenes temporales)
+const upload = multer({ dest: "uploads/" });
 
-// 🟢 Obtener perfil autenticado
+// 🟣 Verificar si el correo ya existe (para registro o edición)
+router.get("/check-email", checkEmail);
+
+// 🟢 Obtener perfil del usuario autenticado
 router.get("/me", auth, getMe);
 
-// 🟣 Verificar si un correo ya está registrado
-router.post("/check-email", checkEmail);
-
-// 🟡 Actualizar datos del usuario (nombre, correo, id, teléfono)
-router.put("/:id", auth, updateUser);
+// 🟡 Actualizar datos del usuario (nombre, email, foto, etc.)
+router.put("/:id", auth, upload.single("profileImage"), updateUser);
 
 // 📸 Subir o actualizar foto de perfil
-router.post("/upload-photo", auth, upload.single("photo"), updateProfilePhoto);
+router.put("/me/photo", auth, upload.single("file"), updateProfilePhoto);
+
+// 🟢 Cambiar rol del usuario (driver/passenger)
+router.put("/role/change", auth, updateRole);
 
 export default router;
