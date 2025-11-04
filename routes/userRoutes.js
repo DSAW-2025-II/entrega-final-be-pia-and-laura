@@ -11,10 +11,11 @@ import { auth } from "../middleware/auth.js";
 
 const router = express.Router();
 
-// 🧩 Configuración de Multer (para subir imágenes temporales)
-const upload = multer({ dest: "uploads/" });
+// 🧩 Configuración de Multer (en memoria, sin carpetas locales)
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
-// 🟣 Verificar si el correo ya existe (para registro o edición)
+// 🟣 Verificar si el correo ya existe
 router.get("/check-email", checkEmail);
 
 // 🟢 Obtener perfil del usuario autenticado
