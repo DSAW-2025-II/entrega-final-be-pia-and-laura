@@ -78,8 +78,6 @@ export const registerCar = async (req, res) => {
 // ==========================
 // ✏️ ACTUALIZAR DATOS DEL CARRO
 // ==========================
-import Car from "../models/Car.js";
-
 export const updateCar = async (req, res) => {
   try {
     const userId = req.user.id;
