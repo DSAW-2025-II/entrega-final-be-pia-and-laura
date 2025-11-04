@@ -1,19 +1,15 @@
 export const uploadPhoto = async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ error: "No se ha enviado ningún archivo" });
+      return res.status(400).json({ message: "No file uploaded" });
     }
 
-    // multer-storage-cloudinary provides the URL in req.file.path
+    // La URL pública generada por Cloudinary
     const imageUrl = req.file.path;
 
-    return res.json({
-      message: "Archivo subido correctamente",
-      url: imageUrl, // return `url` for frontend compatibility
-      secure_url: imageUrl, // optional, keep for compatibility
-    });
+    res.status(200).json({ url: imageUrl });
   } catch (error) {
-    console.error("Error al subir:", error);
-    res.status(500).json({ error: "Error al subir archivo" });
+    console.error("Error uploading image:", error);
+    res.status(500).json({ message: "Error uploading image" });
   }
 };
