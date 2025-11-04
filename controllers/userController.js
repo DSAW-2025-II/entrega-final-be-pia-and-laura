@@ -1,7 +1,8 @@
-// controllers/userController.js
 import User from "../models/User.js";
 import cloudinary from "../config/cloudinary.js";
 import fs from "fs";
+import bcrypt from "bcryptjs";
+
 
 // 🟢 Cambiar el rol del usuario autenticado
 export const updateRole = async (req, res) => {
@@ -81,10 +82,25 @@ export const updateUser = async (req, res) => {
       return res.status(403).json({ message: "No autorizado" });
     }
 
-    const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, {
+    const { password, ...rest } = req.body;
+    const updateData = { ...rest };
+
+    // 🔹 Si el usuario envía una nueva contraseña
+    if (password && password.trim() !== "") {
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+      updateData.password = hashedPassword;
+    }
+
+    // 🔹 Si se sube imagen desde Cloudinary (ya manejas eso en otra ruta)
+    // Aquí solo dejamos preparado por si también llega desde FormData
+    if (req.file) {
+      updateData.photo = req.file.path;
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(req.params.id, updateData, {
       new: true,
-      select: "-password",
-    });
+    }).select("-password");
 
     if (!updatedUser) {
       return res.status(404).json({ message: "Usuario no encontrado" });
@@ -92,6 +108,7 @@ export const updateUser = async (req, res) => {
 
     res.status(200).json(updatedUser);
   } catch (error) {
+    console.error("Error al actualizar usuario:", error);
     res.status(500).json({ message: error.message });
   }
 };
