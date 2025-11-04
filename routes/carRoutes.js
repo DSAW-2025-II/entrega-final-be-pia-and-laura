@@ -2,7 +2,7 @@ import express from "express";
 import multer from "multer";
 import { v2 as cloudinary } from "cloudinary";
 import { CloudinaryStorage } from "multer-storage-cloudinary";
-import { registerCar, updateCar, getMyCar } from "../controllers/carController.js";
+import { registerCar, updateCar } from "../controllers/carController.js";
 import { auth } from "../middleware/auth.js";
 
 const router = express.Router();
@@ -39,7 +39,7 @@ router.post(
 );
 
 // 🚙 Obtener el carro del usuario actual
-router.get("/myCar", auth, getMyCar);
+router.get("/myCar", auth, updateCar);
 
 // ✏️ Actualizar datos del carro existente
 router.put(

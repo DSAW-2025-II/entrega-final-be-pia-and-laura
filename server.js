@@ -50,6 +50,8 @@ app.get("/", (req, res) => {
   res.send("Servidor funcionando con MongoDB");
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Servidor corriendo en puerto ${PORT}`));
-console.log("Cloudinary:", process.env.CLOUDINARY_CLOUD_NAME, process.env.CLOUDINARY_API_KEY);
+// const PORT = process.env.PORT || 5000;
+// app.listen(PORT, () => console.log(`🚀 Servidor corriendo en puerto ${PORT}`));
+// console.log("Cloudinary:", process.env.CLOUDINARY_CLOUD_NAME, process.env.CLOUDINARY_API_KEY);
+
+export default app;
