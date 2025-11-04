@@ -1,22 +1,20 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import path from "path";
-
 import { connectDB } from "./config/database.js";
+
 import authRoutes from "./routes/authRoutes.js";
 import carRoutes from "./routes/carRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import reservationRoutes from "./routes/reservationRoutes.js";
-import uploadRoutes from "./routes/uploadRoutes.js"; // ensure filename matches
+import uploadRoutes from "./routes/uploadRoutes.js";
 
 dotenv.config();
 const app = express();
 
 // 🌐 Configuración de CORS
 const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:5174",
+  "http://localhost:5173", // desarrollo
   "https://wheels-project.vercel.app", // producción
 ];
 
@@ -36,19 +34,21 @@ app.use(
   })
 );
 
-// ✅ Express + Vercel compatible
-app.options(/.*/, cors());
+// ✅ Permitir preflight requests (con misma config)
+app.options("*", cors());
+
+// Middleware base
 app.use(express.json());
 
 // 🧠 Conexión a la base de datos
 connectDB();
 
-// 📦 Rutas principales
-app.use("/auth", authRoutes);
-app.use("/user", userRoutes);
-app.use("/car", carRoutes);
-app.use("/reservations", reservationRoutes);
-app.use("/upload", uploadRoutes); // <- mount upload under /api/v1/upload
+// 📦 Prefijo común para la API
+app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/user", userRoutes);
+app.use("/api/v1/car", carRoutes);
+app.use("/api/v1/reservations", reservationRoutes);
+app.use("/api/v1/upload", uploadRoutes);
 
 // 🌍 Ruta base
 app.get("/", (req, res) => {
