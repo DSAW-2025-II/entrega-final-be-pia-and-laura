@@ -3,6 +3,7 @@ import User from "../models/User.js";
 
 export const auth = async (req, res, next) => {
   try {
+    console.log("🧩 auth middleware ejecutado, headers:", req.headers.authorization);
     const authHeader = req.headers.authorization;
 
     if (!authHeader?.startsWith("Bearer ")) {
@@ -42,4 +43,3 @@ export const auth = async (req, res, next) => {
     return res.status(401).json({ message: "Token inválido o expirado." });
   }
 };
-console.log("🧩 auth middleware ejecutado, headers:", req.headers.authorization);

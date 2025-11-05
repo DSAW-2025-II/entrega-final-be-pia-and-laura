@@ -2,6 +2,7 @@ import Car from "../models/Car.js";
 
 export const uploadPhoto = async (req, res) => {
   try {
+    console.log("📤 req.user recibido en upload:", req.user);
     // 🧩 1️⃣ Verifica que Multer haya recibido un archivo
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
@@ -42,4 +43,3 @@ export const uploadPhoto = async (req, res) => {
     });
   }
 };
-console.log("📤 req.user recibido en upload:", req.user);
