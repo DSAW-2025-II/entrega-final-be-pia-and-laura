@@ -17,7 +17,7 @@ export const uploadPhoto = async (req, res) => {
 
     // 🧩 2️⃣ Buscar el carro asociado al usuario
     const updatedCar = await Car.findOneAndUpdate(
-      { user: userId },
+      { owner: userId },
       { carPhotoUrl: imageUrl },
       { new: true }
     );
