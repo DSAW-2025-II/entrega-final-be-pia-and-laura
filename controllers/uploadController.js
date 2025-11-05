@@ -42,3 +42,4 @@ export const uploadPhoto = async (req, res) => {
     });
   }
 };
+console.log("📤 req.user recibido en upload:", req.user);

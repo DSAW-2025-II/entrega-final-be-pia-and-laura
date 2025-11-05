@@ -42,3 +42,4 @@ export const auth = async (req, res, next) => {
     return res.status(401).json({ message: "Token inválido o expirado." });
   }
 };
+console.log("🧩 auth middleware ejecutado, headers:", req.headers.authorization);
