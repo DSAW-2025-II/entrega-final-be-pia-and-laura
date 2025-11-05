@@ -75,20 +75,29 @@ export const getMe = async (req, res) => {
 // 🟡 Actualizar datos del usuario autenticado
 export const updateUser = async (req, res) => {
   try {
+    // 🟠 Seguridad básica
     if (req.user.id !== req.params.id) {
       return res.status(403).json({ message: "No autorizado" });
     }
 
-    const { password, ...rest } = req.body;
-    const updateData = { ...rest };
+    // 🟠 Crear un objeto limpio con los datos del body
+    const updateData = {};
 
-    // 🔹 Encriptar contraseña si llega nueva
-    if (password && password.trim() !== "") {
-      const salt = await bcrypt.genSalt(10);
-      updateData.password = await bcrypt.hash(password, salt);
+    // Convertimos el FormData (req.body) en un objeto real usable
+    for (const key in req.body) {
+      if (req.body[key] === "undefined" || req.body[key] === "null") continue; // evitar basura
+      updateData[key] = req.body[key];
     }
 
-    // 🔹 Si llega imagen en memoria (desde multer.memoryStorage)
+    // 🟠 Encriptar contraseña si llega nueva
+    if (updateData.password && updateData.password.trim() !== "") {
+      const salt = await bcrypt.genSalt(10);
+      updateData.password = await bcrypt.hash(updateData.password, salt);
+    } else {
+      delete updateData.password; // no queremos sobreescribir con vacío
+    }
+
+    // 🟠 Manejar imagen enviada directamente (desde el frontend)
     if (req.file) {
       const fileBase64 = req.file.buffer.toString("base64");
       const upload = await cloudinary.uploader.upload(
@@ -101,10 +110,12 @@ export const updateUser = async (req, res) => {
       updateData.profileImage = upload.secure_url;
     }
 
-    const updatedUser = await User.findByIdAndUpdate(req.params.id, updateData, {
-      new: true,
-      runValidators: true,
-    }).select("-password");
+    // 🟠 Actualizar en la base de datos
+    const updatedUser = await User.findByIdAndUpdate(
+      req.params.id,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    ).select("-password");
 
     if (!updatedUser) {
       return res.status(404).json({ message: "Usuario no encontrado" });
@@ -119,6 +130,7 @@ export const updateUser = async (req, res) => {
     res.status(500).json({ message: "Error al actualizar usuario" });
   }
 };
+
 
 // 📸 Subir o actualizar foto de perfil
 export const updateProfilePhoto = async (req, res) => {
