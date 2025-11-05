@@ -22,7 +22,7 @@ router.get("/check-email", checkEmail);
 router.get("/me", auth, getMe);
 
 // 🟡 Actualizar datos del usuario (nombre, email, foto, etc.)
-router.put("/:id", auth, upload.single("profileImage"), updateUser);
+router.put("/:id", auth, upload.single("photo"), updateUser);
 
 // 📸 Subir o actualizar foto de perfil
 router.put("/me/photo", auth, upload.single("file"), updateProfilePhoto);

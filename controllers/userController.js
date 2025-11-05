@@ -107,7 +107,7 @@ export const updateUser = async (req, res) => {
           transformation: [{ width: 500, height: 500, crop: "fill" }],
         }
       );
-      updateData.profileImage = upload.secure_url;
+      updateData.photo = upload.secure_url;
     }
 
     // 🟠 Actualizar en la base de datos
