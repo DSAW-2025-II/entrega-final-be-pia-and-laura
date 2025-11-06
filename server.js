@@ -8,6 +8,8 @@ import carRoutes from "./routes/carRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import reservationRoutes from "./routes/reservationRoutes.js";
 import uploadRoutes from "./routes/uploadRotes.js";
+import tripRoutes from "./routes/tripsRoutes.js";
+
 
 dotenv.config();
 console.log("Cloudinary env vars:", process.env.CLOUDINARY_CLOUD_NAME ? "✅ Loaded" : "❌ Missing");
@@ -50,6 +52,7 @@ app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/car", carRoutes);
 app.use("/api/v1/reservations", reservationRoutes);
 app.use("/api/v1/upload", uploadRoutes);
+app.use("/api/trips", tripRoutes);
 
 // 🌍 Ruta base
 app.get("/", (req, res) => {

@@ -30,5 +30,4 @@ router.put("/role/change", auth, updateRole);
 // 🟡 Actualizar datos del usuario (nombre, email, foto, etc.)
 router.put("/:id", auth, upload.single("photo"), updateUser);
 
-
 export default router;
