@@ -1,6 +1,6 @@
 import express from "express";
 import Trip from "../models/Trip.js";
-import { verifyToken } from "../middleware/auth.js";
+import { auth } from "../middleware/auth.js";
 
 const router = express.Router();
 
@@ -9,7 +9,7 @@ const router = express.Router();
  * @desc    Crear un nuevo viaje
  * @access  Private (solo conductores autenticados)
  */
-router.post("/", verifyToken, async (req, res) => {
+router.post("/", auth, async (req, res) => {
   try {
     const { startPoint, endPoint, route, departureTime, seats, price } = req.body;
 
@@ -55,7 +55,7 @@ router.get("/", async (req, res) => {
  * @desc    Obtener los viajes creados por el conductor autenticado
  * @access  Private
  */
-router.get("/my-trips", verifyToken, async (req, res) => {
+router.get("/my-trips", auth, async (req, res) => {
   try {
     const trips = await Trip.find({ driver: req.user.id });
     res.json(trips);
@@ -70,7 +70,7 @@ router.get("/my-trips", verifyToken, async (req, res) => {
  * @desc    Eliminar un viaje (solo si pertenece al conductor)
  * @access  Private
  */
-router.delete("/:id", verifyToken, async (req, res) => {
+router.delete("/:id", auth, async (req, res) => {
   try {
     const trip = await Trip.findById(req.params.id);
     if (!trip) return res.status(404).json({ message: "Trip not found" });
