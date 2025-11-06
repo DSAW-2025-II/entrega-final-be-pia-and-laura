@@ -150,7 +150,7 @@ export const updateProfilePhoto = async (req, res) => {
     );
 
     const updatedUser = await User.findByIdAndUpdate(
-      req.user._id,
+      req.user.id,
       { photo: result.secure_url },
       { new: true, select: "-password" }
     );

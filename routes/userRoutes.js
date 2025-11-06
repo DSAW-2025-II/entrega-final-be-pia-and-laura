@@ -21,13 +21,14 @@ router.get("/check-email", checkEmail);
 // 🟢 Obtener perfil del usuario autenticado
 router.get("/me", auth, getMe);
 
-// 🟡 Actualizar datos del usuario (nombre, email, foto, etc.)
-router.put("/:id", auth, upload.single("photo"), updateUser);
-
 // 📸 Subir o actualizar foto de perfil
 router.put("/me/photo", auth, upload.single("file"), updateProfilePhoto);
 
 // 🟢 Cambiar rol del usuario (driver/passenger)
 router.put("/role/change", auth, updateRole);
+
+// 🟡 Actualizar datos del usuario (nombre, email, foto, etc.)
+router.put("/:id", auth, upload.single("photo"), updateUser);
+
 
 export default router;
