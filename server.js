@@ -52,7 +52,7 @@ app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/car", carRoutes);
 app.use("/api/v1/reservations", reservationRoutes);
 app.use("/api/v1/upload", uploadRoutes);
-app.use("/api/trips", tripRoutes);
+app.use("/api/v1/trips", tripRoutes);
 
 // 🌍 Ruta base
 app.get("/", (req, res) => {
