@@ -51,11 +51,11 @@ router.get("/", async (req, res) => {
 });
 
 /**
- * @route   GET /api/trips/my-trips
+ * @route   GET /api/trips
  * @desc    Obtener los viajes creados por el conductor autenticado
  * @access  Private
  */
-router.get("/my-trips", auth, async (req, res) => {
+router.get("/trips", auth, async (req, res) => {
   try {
     const trips = await Trip.find({ driver: req.user.id });
     res.json(trips);
