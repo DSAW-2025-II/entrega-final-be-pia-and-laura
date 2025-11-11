@@ -13,7 +13,7 @@ router.get("/geocode", async (req, res) => {
   try {
     const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(
       place
-    )}.json?access_token=${MAPBOX_SECRET}&limit=5&language=es`;
+    )}.json?access_token=${MAPBOX_SECRET}&limit=5&language=es&country=CO`;
 
     const response = await fetch(url);
     if (!response.ok) {
