@@ -9,6 +9,7 @@ import userRoutes from "./routes/userRoutes.js";
 import reservationRoutes from "./routes/reservationRoutes.js";
 import uploadRoutes from "./routes/uploadRotes.js";
 import tripRoutes from "./routes/tripsRoutes.js";
+import mapRoutes from "./routes/mapRoutes.js";
 
 
 dotenv.config();
@@ -53,6 +54,7 @@ app.use("/api/v1/car", carRoutes);
 app.use("/api/v1/reservations", reservationRoutes);
 app.use("/api/v1/upload", uploadRoutes);
 app.use("/api/v1/trips", tripRoutes);
+app.use("/api/v1/maps", mapRoutes);
 
 // 🌍 Ruta base
 app.get("/", (req, res) => {

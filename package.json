@@ -27,10 +27,12 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
+    "mapbox-gl": "^3.16.0",
     "mongoose": "^8.19.2",
     "multer": "^2.0.2",
     "multer-storage-cloudinary": "^4.0.0",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "react-map-gl": "^8.1.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"
