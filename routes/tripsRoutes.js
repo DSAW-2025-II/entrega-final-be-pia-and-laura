@@ -17,6 +17,21 @@ router.post("/", auth, async (req, res) => {
       return res.status(400).json({ message: "All required fields must be filled" });
     }
 
+    if (price < 1400) {
+  return res.status(400).json({ message: "Minimum price is $1.400" });
+  }
+    
+  if (seats < 1) {
+      return res.status(400).json({ message: "There must be at least 1 seat available" });
+    }
+
+    // Validar que la fecha no sea anterior a la actual
+const tripDate = new Date(departureTime);
+if (tripDate < new Date()) {
+  return res.status(400).json({ message: "Date must be in the future" });
+}
+
+
     const newTrip = new Trip({
       startPoint,
       endPoint,
@@ -42,7 +57,7 @@ router.post("/", auth, async (req, res) => {
  */
 router.get("/", async (req, res) => {
   try {
-    const trips = await Trip.find().populate("driver", "name profileImage");
+    const trips = await Trip.find().populate("driver", "name photo");
     res.json(trips);
   } catch (error) {
     console.error(error);
