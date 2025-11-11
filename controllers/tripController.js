@@ -44,7 +44,17 @@ export const createTrip = async (req, res) => {
 // Obtener todos los viajes disponibles (para pasajeros)
 export const getAvailableTrips = async (req, res) => {
   try {
-    const trips = await Trip.find({ seats: { $gt: 0 } })
+    const { seats } = req.query; // 🔹 viene del frontend: ?seats=2
+
+    // Base: solo viajes con al menos 1 asiento disponible
+    let filter = { seats: { $gt: 0 } };
+
+    // 🔹 Si se pasa un filtro de asientos, lo aplicamos
+    if (seats) {
+      filter.seats = { $gte: parseInt(seats) };
+    }
+
+    const trips = await Trip.find(filter)
       .populate("driver", "name photo")
       .sort({ departureTime: 1 });
 
@@ -54,6 +64,7 @@ export const getAvailableTrips = async (req, res) => {
     res.status(500).json({ message: "Error fetching trips" });
   }
 };
+
 
 // Obtener viajes creados por el conductor autenticado
 export const getDriverTrips = async (req, res) => {
