@@ -14,8 +14,21 @@ const reservationSchema = new mongoose.Schema(
     },
     carId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Car", // si tienes un modelo de autos
+      ref: "Car",
     },
+
+    // 🔥 NUEVO
+    seats: { 
+      type: Number, 
+      required: true, 
+      min: 1 
+    },
+
+    note: { 
+      type: String, 
+      trim: true 
+    },
+
     destination: { 
       type: String, 
       required: true, 
@@ -35,13 +48,14 @@ const reservationSchema = new mongoose.Schema(
       required: true, 
       min: 0 
     },
+
     status: {
       type: String,
       enum: ["pending", "confirmed", "completed", "cancelled"],
       default: "pending",
     },
   },
-  { timestamps: true } // agrega createdAt y updatedAt automáticamente
+  { timestamps: true }
 );
 
 export default mongoose.model("Reservation", reservationSchema);
