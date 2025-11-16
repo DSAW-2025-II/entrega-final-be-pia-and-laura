@@ -8,6 +8,11 @@ const tripSchema = new mongoose.Schema({
   seats: { type: Number, required: true },
   price: { type: Number, required: true },
   driver: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+  startCoords: { type: Object },
+  endCoords: { type: Object },
+  startZone: { type: String },
+  endZone: { type: String },
+
 }, { timestamps: true });
 
 export default mongoose.model("Trip", tripSchema);

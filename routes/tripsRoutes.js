@@ -5,6 +5,7 @@ import {
   getAvailableTrips,
   getDriverTrips,
   deleteTrip,
+  searchTrips,
 } from "../controllers/tripController.js";
 
 const router = express.Router();
@@ -20,5 +21,7 @@ router.get("/my-trips", auth, getDriverTrips);
 
 // Eliminar un viaje propio
 router.delete("/:id", auth, deleteTrip);
+
+router.get("/search", searchTrips);
 
 export default router;
