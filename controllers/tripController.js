@@ -116,12 +116,18 @@ export const searchTrips = async (req, res) => {
   try {
     const trips = await Trip.find().populate("driver", "name photo");
 
+export const searchTrips = async (req, res) => {
+  const { lat, lng, radius = 5, seats } = req.query;
+
+  try {
+    const trips = await Trip.find().populate("driver", "name photo");
+
     const filteredTrips = trips.filter((trip) => {
-      if (!trip.endCoords || !trip.endCoords.lat || !trip.endCoords.lng) return false;
+      if (!trip.endCoords || trip.endCoords.length < 2) return false;
 
       const distance = haversine(
-        parseFloat(trip.endCoords.lat),
-        parseFloat(trip.endCoords.lng),
+        parseFloat(trip.endCoords[1]), // lat
+        parseFloat(trip.endCoords[0]), // lng
         parseFloat(lat),
         parseFloat(lng)
       );
@@ -129,12 +135,11 @@ export const searchTrips = async (req, res) => {
       return distance <= radius; // kilómetros
     });
 
-    // Filtrar asientos si se envía parámetro
     const seatsFiltered = seats
       ? filteredTrips.filter((t) => t.seats >= parseInt(seats))
       : filteredTrips;
 
-    console.log("🟢 Viajes filtrados:", seatsFiltered.length);
+    console.log("🟢 Viajes filtrados:", seatsFiltered.length, seatsFiltered);
     res.json(seatsFiltered);
 
   } catch (error) {
@@ -142,4 +147,5 @@ export const searchTrips = async (req, res) => {
     res.status(500).json({ error: "Error al buscar viajes" });
   }
 };
+
 
