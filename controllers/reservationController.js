@@ -124,3 +124,42 @@ export const cancelReservation = async (req, res) => {
     res.status(500).json({ message: "Error cancelling reservation" });
   }
 };
+export const updateReservation = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const reservation = await Reservation.findById(id).populate("driver");
+
+    if (!reservation) {
+      return res.status(404).json({ message: "Reservation not found" });
+    }
+
+    const userId = req.user.id.toString();
+    const isDriver = reservation.driver?._id === userId;
+    const isPassenger = reservation.passenger?._id === userId;
+
+    if (!isPassenger && !isDriver) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    // Solo el conductor puede: confirmed / declined
+    if ((status === "confirmed" || status === "declined") && !isDriver) {
+      return res.status(403).json({ message: "Only the driver can accept/decline" });
+    }
+
+    // Solo el pasajero puede cancelar
+    if (status === "cancelled" && !isPassenger) {
+      return res.status(403).json({ message: "Only the passenger can cancel" });
+    }
+
+    reservation.status = status;
+    await reservation.save();
+
+    res.status(200).json(reservation);
+
+  } catch (error) {
+    console.error("Error updating reservation:", error);
+    res.status(500).json({ message: "Error updating reservation" });
+  }
+};
