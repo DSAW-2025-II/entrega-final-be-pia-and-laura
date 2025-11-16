@@ -4,6 +4,8 @@ import Trip from "../models/Trip.js";
 export const createTrip = async (req, res) => {
   try {
     const { startPoint, endPoint, route, departureTime, seats, price } = req.body;
+    const { startCoords, endCoords } = req.body;
+
 
     if (!startPoint || !endPoint || !departureTime || !seats || !price) {
       return res.status(400).json({ message: "All required fields must be filled" });
@@ -24,13 +26,15 @@ export const createTrip = async (req, res) => {
     }
 
     const newTrip = new Trip({
-      startPoint,
-      endPoint,
-      route,
-      departureTime,
-      seats,
-      price,
-      driver: req.user.id, // <- viene del token JWT
+        startPoint,
+        endPoint,
+        route,
+        departureTime,
+        seats,
+        price,
+        driver: req.user.id,
+        startCoords,
+        endCoords, // <- viene del token JWT
     });
 
     const savedTrip = await newTrip.save();
@@ -107,24 +111,35 @@ function haversine(lat1, lon1, lat2, lon2) {
 }
 
 export const searchTrips = async (req, res) => {
-  const { lat, lng, radius = 5 } = req.query; // radio en km
+  const { lat, lng, radius = 5, seats } = req.query;
 
   try {
-    const trips = await Trip.find();
+    const trips = await Trip.find().populate("driver", "name photo");
 
-    const filteredTrips = trips.filter(trip => {
-      if (!trip.endCoords) return false;
-      return haversine(
-        trip.endCoords.latitude,
-        trip.endCoords.longitude,
+    const filteredTrips = trips.filter((trip) => {
+      if (!trip.endCoords || !trip.endCoords.lat || !trip.endCoords.lng) return false;
+
+      const distance = haversine(
+        parseFloat(trip.endCoords.lat),
+        parseFloat(trip.endCoords.lng),
         parseFloat(lat),
         parseFloat(lng)
-      ) <= radius;
+      );
+
+      return distance <= radius; // kilómetros
     });
 
-    res.json(filteredTrips);
+    // Filtrar asientos si se envía parámetro
+    const seatsFiltered = seats
+      ? filteredTrips.filter((t) => t.seats >= parseInt(seats))
+      : filteredTrips;
+
+    console.log("🟢 Viajes filtrados:", seatsFiltered.length);
+    res.json(seatsFiltered);
+
   } catch (error) {
-    console.error(error);
+    console.error("❌ Error en searchTrips:", error);
     res.status(500).json({ error: "Error al buscar viajes" });
   }
 };
+
