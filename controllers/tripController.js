@@ -100,7 +100,7 @@ export const deleteTrip = async (req, res) => {
 };
 
 function haversine(lat1, lon1, lat2, lon2) {
-  const R = 6371; // radio de la tierra en km
+  const R = 6371;
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
   const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
@@ -116,23 +116,17 @@ export const searchTrips = async (req, res) => {
   try {
     const trips = await Trip.find().populate("driver", "name photo");
 
-export const searchTrips = async (req, res) => {
-  const { lat, lng, radius = 5, seats } = req.query;
-
-  try {
-    const trips = await Trip.find().populate("driver", "name photo");
-
     const filteredTrips = trips.filter((trip) => {
       if (!trip.endCoords || trip.endCoords.length < 2) return false;
 
       const distance = haversine(
-        parseFloat(trip.endCoords[1]), // lat
-        parseFloat(trip.endCoords[0]), // lng
+        parseFloat(trip.endCoords[1]), // lat stored
+        parseFloat(trip.endCoords[0]), // lng stored
         parseFloat(lat),
         parseFloat(lng)
       );
 
-      return distance <= radius; // kilómetros
+      return distance <= radius;
     });
 
     const seatsFiltered = seats
@@ -147,5 +141,3 @@ export const searchTrips = async (req, res) => {
     res.status(500).json({ error: "Error al buscar viajes" });
   }
 };
-
-
