@@ -112,7 +112,7 @@ export const getReservationsByUser = async (req, res) => {
         tomorrow.push(r);
     });
 
-    res.status(200).json({ today, tomorrow });
+    res.status(200).json({ reservations, today, tomorrow });
 
   } catch (error) {
     console.error("Error fetching reservations:", error);
