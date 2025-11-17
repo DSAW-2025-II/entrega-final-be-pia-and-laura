@@ -12,7 +12,11 @@ const tripSchema = new mongoose.Schema({
   endCoords: { type: Object },
   startZone: { type: String },
   endZone: { type: String },
-
+  isFull: { type: Boolean, default: false }
 }, { timestamps: true });
+tripSchema.pre("save", function (next) {
+  this.isFull = this.seats <= 0;
+  next();
+});
 
 export default mongoose.model("Trip", tripSchema);

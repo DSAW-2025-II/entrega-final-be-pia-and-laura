@@ -4,7 +4,6 @@ import Trip from "../models/Trip.js";
 export const createReservation = async (req, res) => {
   try {
     const { trip, seats, note } = req.body;
-
     const passenger = req.user.id;
 
     const tripData = await Trip.findById(trip);
@@ -12,24 +11,39 @@ export const createReservation = async (req, res) => {
       return res.status(404).json({ message: "Trip not found" });
     }
 
+    // 🛑 Bloqueo si no hay asientos disponibles
+    if (tripData.seats <= 0) {
+      return res.status(400).json({ message: "Trip is full" });
+    }
+
+    // 🛑 Bloqueo si intenta reservar más asientos de los disponibles
+    if (seats > tripData.seats) {
+      return res.status(400).json({
+        message: `Only ${tripData.seats} seats available`,
+      });
+    }
+
+    // 🟢 Restar asientos disponibles
+    tripData.seats -= seats;
+    await tripData.save();
+
+    // Crear reserva
     const newReservation = new Reservation({
       trip,
       passenger,
       driver: tripData.driver,
       carId: tripData.car,
-
       seats,
       note,
-
       origin: tripData.startPoint,
       destination: tripData.endPoint,
       date: tripData.departureTime,
       price: tripData.price,
-
-      status: "pending", // 🔥 aunque el modelo ya lo pone por defecto
+      status: "pending",
     });
 
     await newReservation.save();
+
     res.status(201).json(newReservation);
 
   } catch (error) {
@@ -63,29 +77,40 @@ export const getReservationsByUser = async (req, res) => {
     const today = [];
     const tomorrow = [];
 
-    const todayDate = new Date();
-    todayDate.setHours(0, 0, 0, 0);
+    // 🔥 Ajustar fechas a zona horaria de Colombia
+    const nowColombia = new Date(
+      new Date().toLocaleString("en-US", { timeZone: "America/Bogota" })
+    );
 
-    const tomorrowDate = new Date(todayDate);
-    tomorrowDate.setDate(todayDate.getDate() + 1);
+    const todayStart = new Date(nowColombia);
+    todayStart.setHours(0, 0, 0, 0);
+
+    const tomorrowStart = new Date(todayStart);
+    tomorrowStart.setDate(todayStart.getDate() + 1);
+
+    const dayAfterTomorrowStart = new Date(todayStart);
+    dayAfterTomorrowStart.setDate(todayStart.getDate() + 2);
 
     reservations.forEach((r) => {
-      const resDate = new Date(r.date);
-      resDate.setHours(0, 0, 0, 0);
+      const localDate = new Date(
+        new Date(r.date).toLocaleString("en-US", { timeZone: "America/Bogota" })
+      );
 
-      if (resDate.getTime() === todayDate.getTime()) {
+      if (localDate >= todayStart && localDate < tomorrowStart) {
         today.push(r);
-      } else if (resDate.getTime() === tomorrowDate.getTime()) {
+      } else if (localDate >= tomorrowStart && localDate < dayAfterTomorrowStart) {
         tomorrow.push(r);
       }
     });
 
     res.status(200).json({ today, tomorrow });
+
   } catch (error) {
     console.error("Error al obtener reservas:", error);
     res.status(500).json({ message: "Error al obtener reservas" });
   }
 };
+
 
 export const cancelReservation = async (req, res) => {
   try {
