@@ -68,6 +68,7 @@ export const getReservationsByUser = async (req, res) => {
     const reservations = await Reservation.find({
       $or: [{ passenger: userId }, { driver: userId }],
     })
+      .populate("trip")
       .populate("passenger", "name email photo")
       .populate("driver", "name email photo")
       .sort({ date: 1 });
