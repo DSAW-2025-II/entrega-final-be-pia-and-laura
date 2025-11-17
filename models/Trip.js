@@ -12,6 +12,7 @@ const tripSchema = new mongoose.Schema({
   endCoords: { type: Object },
   startZone: { type: String },
   endZone: { type: String },
+  car: { type: mongoose.Schema.Types.ObjectId, ref: "Car" },
   isFull: { type: Boolean, default: false }
 }, { timestamps: true });
 tripSchema.pre("save", function (next) {
