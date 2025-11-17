@@ -161,15 +161,15 @@ export const updateReservation = async (req, res) => {
     }
 
     const userId = req.user.id.toString();
-    const isDriver = reservation.driver?._id === userId;
-    const isPassenger = reservation.passenger?._id === userId;
+    const isDriver = String(reservation.driver?._id) === userId;
+    const isPassenger = String(reservation.passenger?._id) === userId;
 
     if (!isPassenger && !isDriver) {
       return res.status(403).json({ message: "Not authorized" });
     }
 
-    // Solo el conductor puede: confirmed / declined
-    if ((status === "confirmed" || status === "declined") && !isDriver) {
+    // Solo el conductor puede: Accepted / declined
+    if ((status === "accepted" || status === "declined") && !isDriver) {
       return res.status(403).json({ message: "Only the driver can accept/decline" });
     }
 

@@ -4,15 +4,14 @@ import {
   createReservation,
   getReservationsByUser,
   cancelReservation,
+  updateReservation,
 } from "../controllers/reservationController.js";
 
 const router = express.Router();
 
-// Crear una nueva reserva
 router.post("/", auth, createReservation);
-// Cancelar reservas por usuario
 router.put("/:id/cancel", auth, cancelReservation);
-// Obtener reservas por usuario
+router.put("/status/:id", auth, updateReservation);
 router.get("/:userId", auth, getReservationsByUser);
 
 export default router;
