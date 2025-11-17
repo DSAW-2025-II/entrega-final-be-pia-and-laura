@@ -14,5 +14,5 @@ router.post("/", auth, createReservation);
 // Obtener reservas por usuario
 router.get("/:userId", auth, getReservationsByUser);
 
-router.delete("/:id/cancel", auth, cancelReservation);
+router.put("/:id/cancel", auth, cancelReservation);
 export default router;
