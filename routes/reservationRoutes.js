@@ -10,9 +10,9 @@ const router = express.Router();
 
 // Crear una nueva reserva
 router.post("/", auth, createReservation);
-
+// Cancelar reservas por usuario
+router.put("/:id/cancel", auth, cancelReservation);
 // Obtener reservas por usuario
 router.get("/:userId", auth, getReservationsByUser);
 
-router.put("/:id/cancel", auth, cancelReservation);
 export default router;
