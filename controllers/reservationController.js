@@ -114,26 +114,34 @@ export const updateReservation = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
+    // 1. Validate ID
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid reservation ID" });
+    }
+
+    // 2. Find reservation
     const reservation = await Reservation.findById(id).populate("driver");
 
     if (!reservation) {
       return res.status(404).json({ message: "Reservation not found" });
     }
 
+    // 3. Only driver can update
     const userId = req.user.id.toString();
-    const isDriver = String(reservation.driver?._id) === userId;
+    const isDriver = reservation.driver?._id?.toString() === userId;
 
-    // 🚫 Passenger can NOT modify anything
-    if (!isDriver)
+    if (!isDriver) {
       return res.status(403).json({ message: "Only the driver can update reservations" });
+    }
 
-    // 🚫 Only allowed statuses
+    // 4. Allowed statuses
     if (!["accepted", "declined"].includes(status)) {
       return res.status(400).json({
         message: "Invalid status. Allowed: accepted, declined",
       });
     }
 
+    // 5. Update status
     reservation.status = status;
     await reservation.save();
 
@@ -141,6 +149,6 @@ export const updateReservation = async (req, res) => {
 
   } catch (error) {
     console.error("Error updating reservation:", error);
-    res.status(500).json({ message: "Error updating reservation" });
+    res.status(500).json({ message: "Error updating reservation", error });
   }
 };
