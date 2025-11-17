@@ -7,7 +7,7 @@ import Trip from "../models/Trip.js";
 ============================================================ */
 export const createReservation = async (req, res) => {
   try {
-    const { trip, seats, note } = req.body;
+    const { trip, seats, note, pickupPoints } = req.body;
     const passenger = req.user.id;
 
     if (!trip) return res.status(400).json({ message: "Trip ID is required" });
@@ -23,6 +23,18 @@ export const createReservation = async (req, res) => {
         message: `Only ${tripData.seats} seats available`,
       });
 
+    // 🔥 Validación pickupPoints
+    if (!pickupPoints || pickupPoints.length === 0) {
+      return res
+        .status(400)
+        .json({ message: "Pickup points are required" });
+    }
+
+    if (pickupPoints.some(p => p.trim() === "")) {
+      return res
+        .status(400)
+        .json({ message: "All pickup points must be filled" });
+    }
     tripData.seats -= seats;
     await tripData.save();
 
@@ -33,6 +45,7 @@ export const createReservation = async (req, res) => {
       carId: tripData.car,
       seats,
       note,
+      pickupPoints,
       origin: tripData.startPoint,
       destination: tripData.endPoint,
       date: tripData.departureTime,
