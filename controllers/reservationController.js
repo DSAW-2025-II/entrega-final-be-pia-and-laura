@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import Reservation from "../models/Reservation.js";
 import Trip from "../models/Trip.js";
 
