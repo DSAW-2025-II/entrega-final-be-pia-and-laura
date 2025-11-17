@@ -19,12 +19,12 @@ export const createTrip = async (req, res) => {
       return res.status(400).json({ message: "There must be at least 1 seat available" });
     }
 
-    // Convertir fecha a hora Colombia (UTC-5)
-    let tripDate = new Date(departureTime);
-    tripDate = new Date(tripDate.getTime() - (5 * 60 * 60 * 1000));
+    // 🔥 Convertir la hora local de Colombia a UTC (+5h)
+    const rawDate = new Date(departureTime);
+    const tripDate = new Date(rawDate.getTime() + 5 * 60 * 60 * 1000);
 
-    // Validar que no sea anterior a la actual
-    const nowColombia = new Date(Date.now() - (5 * 60 * 60 * 1000));
+    // Validar que no sea anterior a la actual (UTC ahora)
+    const nowColombia = new Date(Date.now());
 
     if (tripDate < nowColombia) {
       return res.status(400).json({ message: "Date must be in the future" });
@@ -34,7 +34,7 @@ export const createTrip = async (req, res) => {
       startPoint,
       endPoint,
       route,
-      departureTime: tripDate, // guardamos la fecha corregida
+      departureTime: tripDate,
       seats,
       price,
       driver: req.user.id,
@@ -50,6 +50,7 @@ export const createTrip = async (req, res) => {
     res.status(500).json({ message: "Error creating trip" });
   }
 };
+
 
 
 // Obtener todos los viajes disponibles (para pasajeros)
