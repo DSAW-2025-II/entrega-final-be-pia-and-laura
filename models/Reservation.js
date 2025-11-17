@@ -59,6 +59,12 @@ const reservationSchema = new mongoose.Schema(
       enum: ["pending", "accepted", "completed", "declined"],
       default: "pending",
     },
+
+    pickupPoints: {
+      type: [String],
+      required: true,
+      default: []
+    },
   },
   { timestamps: true }
 );
