@@ -5,7 +5,9 @@ export const createReservation = async (req, res) => {
   try {
     const { trip, seats, note } = req.body;
     const passenger = req.user.id;
-
+    if (!trip) {
+      return res.status(400).json({ message: "Trip ID is required" });
+    } 
     const tripData = await Trip.findById(trip);
     if (!tripData) {
       return res.status(404).json({ message: "Trip not found" });
