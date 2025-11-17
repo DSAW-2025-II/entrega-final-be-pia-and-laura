@@ -1,3 +1,5 @@
+import mongoose from "mongoose";
+
 const reservationSchema = new mongoose.Schema(
   {
     trip: { 
@@ -60,3 +62,4 @@ const reservationSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+export default mongoose.model("Reservation", reservationSchema);
