@@ -1,7 +1,11 @@
-import mongoose from "mongoose";
-
 const reservationSchema = new mongoose.Schema(
   {
+    trip: { 
+      type: mongoose.Schema.Types.ObjectId, 
+      ref: "Trip",
+      required: true 
+    },
+
     passenger: { 
       type: mongoose.Schema.Types.ObjectId, 
       ref: "User", 
@@ -12,12 +16,12 @@ const reservationSchema = new mongoose.Schema(
       ref: "User", 
       required: true 
     },
+
     carId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Car",
     },
 
-    // 🔥 NUEVO
     seats: { 
       type: Number, 
       required: true, 
@@ -29,33 +33,30 @@ const reservationSchema = new mongoose.Schema(
       trim: true 
     },
 
-    destination: { 
-      type: String, 
-      required: true, 
-      trim: true 
-    },
     origin: { 
       type: String, 
-      required: true, 
-      trim: true 
+      required: true 
     },
+    destination: { 
+      type: String, 
+      required: true 
+    },
+
     date: { 
       type: Date, 
       required: true 
     },
+
     price: { 
       type: Number, 
-      required: true, 
-      min: 0 
+      required: true 
     },
 
     status: {
       type: String,
-      enum: ["pending", "confirmed", "completed", "cancelled"],
+      enum: ["pending", "accepted", "completed", "cancelled"],
       default: "pending",
     },
   },
   { timestamps: true }
 );
-
-export default mongoose.model("Reservation", reservationSchema);
