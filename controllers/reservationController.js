@@ -116,19 +116,18 @@ export const updateReservation = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    // 1. Validate ID
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: "Invalid reservation ID" });
     }
 
-    // 2. Find reservation
-    const reservation = await Reservation.findById(id).populate("driver");
+    const reservation = await Reservation.findById(id)
+      .populate("driver")
+      .populate("trip");
 
     if (!reservation) {
       return res.status(404).json({ message: "Reservation not found" });
     }
 
-    // 3. Only driver can update
     const userId = req.user.id.toString();
     const isDriver = reservation.driver?._id?.toString() === userId;
 
@@ -136,14 +135,21 @@ export const updateReservation = async (req, res) => {
       return res.status(403).json({ message: "Only the driver can update reservations" });
     }
 
-    // 4. Allowed statuses
     if (!["accepted", "declined"].includes(status)) {
       return res.status(400).json({
         message: "Invalid status. Allowed: accepted, declined",
       });
     }
 
-    // 5. Update status
+    /* ------------------------------------------------------------
+       🔥 REACTIVAR CUPOS SI SE DECLINA Y ANTES ESTABA PENDING
+    ------------------------------------------------------------ */
+    if (status === "declined" && reservation.status === "pending") {
+      const trip = await Trip.findById(reservation.trip._id);
+      trip.seats += reservation.seats;   // REINTEGRAR CUPOS
+      await trip.save();
+    }
+
     reservation.status = status;
     await reservation.save();
 
