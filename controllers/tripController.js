@@ -1,11 +1,11 @@
 import Trip from "../models/Trip.js";
 
 // Crear un nuevo viaje
+// Crear un nuevo viaje
 export const createTrip = async (req, res) => {
   try {
     const { startPoint, endPoint, route, departureTime, seats, price } = req.body;
     const { startCoords, endCoords } = req.body;
-
 
     if (!startPoint || !endPoint || !departureTime || !seats || !price) {
       return res.status(400).json({ message: "All required fields must be filled" });
@@ -19,31 +19,38 @@ export const createTrip = async (req, res) => {
       return res.status(400).json({ message: "There must be at least 1 seat available" });
     }
 
-    // Validar que la fecha no sea anterior a la actual
-    const tripDate = new Date(departureTime);
-    if (tripDate < new Date()) {
+    // Convertir fecha a hora Colombia (UTC-5)
+    let tripDate = new Date(departureTime);
+    tripDate = new Date(tripDate.getTime() - (5 * 60 * 60 * 1000));
+
+    // Validar que no sea anterior a la actual
+    const nowColombia = new Date(Date.now() - (5 * 60 * 60 * 1000));
+
+    if (tripDate < nowColombia) {
       return res.status(400).json({ message: "Date must be in the future" });
     }
 
     const newTrip = new Trip({
-        startPoint,
-        endPoint,
-        route,
-        departureTime,
-        seats,
-        price,
-        driver: req.user.id,
-        startCoords,
-        endCoords, // <- viene del token JWT
+      startPoint,
+      endPoint,
+      route,
+      departureTime: tripDate, // guardamos la fecha corregida
+      seats,
+      price,
+      driver: req.user.id,
+      startCoords,
+      endCoords,
     });
 
     const savedTrip = await newTrip.save();
     res.status(201).json(savedTrip);
+
   } catch (error) {
     console.error("Error creating trip:", error);
     res.status(500).json({ message: "Error creating trip" });
   }
 };
+
 
 // Obtener todos los viajes disponibles (para pasajeros)
 export const getAvailableTrips = async (req, res) => {
