@@ -1,134 +1,55 @@
-require("dotenv").config();
 const express = require("express");
-const mongoose = require("mongoose");
 const cors = require("cors");
-const bcrypt = require("bcryptjs");
 
 const app = express();
-app.use(express.json());
 app.use(cors());
+app.use(express.json());
 
-// ------------------ DATABASE CONNECTION ------------------
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB connected"))
-  .catch(err => console.log(err));
+// ===== TEMP DATA =====
+let users = [];
+let rides = [];
 
-// ------------------ USER SCHEMA ------------------
-const UserSchema = new mongoose.Schema({
-  firstName: String,
-  lastName: String,
-  universityId: String,
-  phone: String,
-  email: { type: String, unique: true },
-  password: String,
-  role: String, // driver or passenger
+// ==== AUTH ====
+app.post("/signup", (req, res) => {
+  users.push(req.body);
+  res.json({ message: "User registered", user: req.body });
 });
 
-const User = mongoose.model("User", UserSchema);
-
-// ------------------ RIDE SCHEMA ------------------
-const RideSchema = new mongoose.Schema({
-  ownerEmail: String,
-  ownerName: String,
-  vehicle: String,
-  date: String,
-  time: String,
-  departure: String,
-  arrival: String,
-  seats: Number,
-  tariff: String,
-  createdAt: String
+app.post("/login", (req, res) => {
+  const { email, password } = req.body;
+  const found = users.find(u => u.email === email && u.password === password);
+  if (!found) return res.status(401).json({ message: "Invalid login" });
+  res.json({ message: "Success", user: found });
 });
 
-const Ride = mongoose.model("Ride", RideSchema);
-
-// ------------------ ROUTES ------------------
-
-// REGISTER
-app.post("/signup", async (req, res) => {
-  try {
-    const exists = await User.findOne({ email: req.body.email });
-    if (exists) return res.status(400).json({ msg: "User already exists" });
-
-    const hashed = await bcrypt.hash(req.body.password, 10);
-
-    const user = await User.create({
-      ...req.body,
-      password: hashed
-    });
-    res.json({ msg: "Registered successfully", user });
-  } catch (err) {
-    res.status(500).json({ msg: "Error registering user", err });
-  }
+// ==== RIDES ====
+app.post("/ride/create", (req, res) => {
+  const ride = { id: Date.now(), ...req.body };
+  rides.push(ride);
+  res.json({ ride });
 });
 
-// LOGIN
-app.post("/login", async (req, res) => {
-  try {
-    const user = await User.findOne({ email: req.body.email });
-    if (!user) return res.status(400).json({ msg: "User not found" });
+app.get("/rides/all", (req, res) => res.json(rides));
 
-    const valid = await bcrypt.compare(req.body.password, user.password);
-    if (!valid) return res.status(400).json({ msg: "Invalid password" });
-
-    res.json({ msg: "Login successful", user });
-  } catch (err) {
-    res.status(500).json({ msg: "Login failed", err });
-  }
+app.get("/rides/driver/:email", (req, res) => {
+  res.json(rides.filter(r => r.driverEmail === req.params.email));
 });
 
-// RESET PASSWORD
-app.post("/reset-password", async (req, res) => {
-  try {
-    const { email, newPassword } = req.body;
-    const user = await User.findOne({ email });
+app.put("/ride/:id", (req, res) => {
+  const id = parseInt(req.params.id);
+  const index = rides.findIndex(r => r.id === id);
 
-    if (!user) return res.status(400).json({ msg: "Email not found" });
+  if (index === -1) return res.status(404).json({ message: "Ride not found" });
 
-    user.password = await bcrypt.hash(newPassword, 10);
-    await user.save();
-
-    res.json({ msg: "Password reset successful" });
-  } catch (err) {
-    res.status(500).json({ msg: "Reset error", err });
-  }
+  rides[index] = { ...rides[index], ...req.body };
+  res.json({ message: "Updated", ride: rides[index] });
 });
 
-// CREATE RIDE (DRIVER)
-app.post("/ride/create", async (req, res) => {
-  try {
-    const ride = await Ride.create(req.body);
-    res.json({ msg: "Ride created", ride });
-  } catch (err) {
-    res.status(500).json({ msg: "Could not create ride", err });
-  }
+app.delete("/ride/:id", (req, res) => {
+  const id = parseInt(req.params.id);
+  rides = rides.filter(r => r.id !== id);
+  res.json({ message: "Deleted" });
 });
 
-// GET RIDES FOR DRIVER
-app.get("/rides/driver/:email", async (req, res) => {
-  const rides = await Ride.find({ ownerEmail: req.params.email });
-  res.json(rides);
-});
-
-// GET ALL RIDES (Passenger view)
-app.get("/rides/all", async (req, res) => {
-  const rides = await Ride.find();
-  res.json(rides);
-});
-
-// DELETE RIDE
-app.delete("/ride/:id", async (req, res) => {
-  await Ride.findByIdAndDelete(req.params.id);
-  res.json({ msg: "Ride deleted" });
-});
-
-// UPDATE RIDE
-app.put("/ride/:id", async (req, res) => {
-  const updated = await Ride.findByIdAndUpdate(req.params.id, req.body, { new: true });
-  res.json(updated);
-});
-
-// ------------------ START SERVER ------------------
-app.listen(process.env.PORT, () =>
-  console.log("Server running on port " + process.env.PORT)
-);
+// START SERVER
+app.listen(4000, () => console.log("Server running on port 4000"));
